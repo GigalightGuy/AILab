@@ -1,5 +1,8 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
     <Style src="project://database/Assets/AILab/Behaviour%20Tree/UI%20Builder/BehaviourTreeEditor.uss?fileID=7433441132597879392&amp;guid=8f4fba632d57da647920e9cbcf484a0d&amp;type=3#BehaviourTreeEditor" />
+    <uie:Toolbar>
+        <uie:ToolbarMenu display-tooltip-when-elided="true" text="Assets" style="min-width: auto; width: auto; -unity-font-style: bold;" />
+    </uie:Toolbar>
     <AILab.BehaviourTree.EditorTools.SplitView fixed-pane-initial-dimension="300">
         <ui:VisualElement name="left-panel" style="flex-grow: 1;">
             <AILab.BehaviourTree.EditorTools.SplitView orientation="Vertical" fixed-pane-initial-dimension="250">

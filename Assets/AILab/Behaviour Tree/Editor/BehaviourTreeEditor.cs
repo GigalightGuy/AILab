@@ -1,7 +1,9 @@
-using UnityEditor;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEditor;
 using UnityEditor.Callbacks;
+using UnityEditor.UIElements;
 
 namespace AILab.BehaviourTree.EditorTools
 {
@@ -10,6 +12,7 @@ namespace AILab.BehaviourTree.EditorTools
         private BehaviourTreeView treeView;
         private InspectorView inspectorView;
         private IMGUIContainer blackboardView;
+        private ToolbarMenu toolbarMenu;
 
         private SerializedObject treeObject;
         private SerializedProperty blackboardProperty;
@@ -19,6 +22,7 @@ namespace AILab.BehaviourTree.EditorTools
         {
             var wnd = GetWindow<BehaviourTreeEditor>();
             wnd.titleContent = new GUIContent("Behaviour Tree Editor");
+            wnd.minSize = new Vector2(800, 600);
         }
 
         [OnOpenAsset]
@@ -48,23 +52,55 @@ namespace AILab.BehaviourTree.EditorTools
                 "Assets/AILab/Behaviour Tree/UI Builder/BehaviourTreeEditor.uss");
             root.styleSheets.Add(styleSheet);
 
+            // Tree view
             treeView = root.Q<BehaviourTreeView>();
-            inspectorView = root.Q<InspectorView>();
-            blackboardView = root.Q<IMGUIContainer>();
+            treeView.OnNodeSelected = OnNodeSelectionChanged;
 
+            // Inspector view
+            inspectorView = root.Q<InspectorView>();
+
+            // Blackboard view
+            blackboardView = root.Q<IMGUIContainer>();
             blackboardView.onGUIHandler = () =>
             {
-                if (blackboardProperty != null)
+                if (treeObject != null && treeObject.targetObject != null)
                 {
-                    treeObject?.Update();
+                    treeObject.Update();
                     EditorGUILayout.PropertyField(blackboardProperty);
-                    treeObject?.ApplyModifiedProperties();
+                    treeObject.ApplyModifiedProperties();
                 }
             };
 
-            treeView.OnNodeSelected = OnNodeSelectionChanged;
+            // Toolbar assets menu
+            toolbarMenu = root.Q<ToolbarMenu>();
+            var behaviourTrees = LoadAssets<BehaviourTree>();
+            behaviourTrees.ForEach(t =>
+            {
+                toolbarMenu.menu.AppendAction($"{t.name}", a => SelectTree(t));
+            });
 
-            OnSelectionChange();
+            if (treeView.tree == null)
+            {
+                OnSelectionChange();
+            }
+            else
+            {
+                SelectTree(treeView.tree);
+            }
+        }
+
+        private List<T> LoadAssets<T>() where T : UnityEngine.Object
+        {
+            string[] assetIds = AssetDatabase.FindAssets($"t:{typeof(T).Name}");
+            var assets = new List<T>();
+            foreach(var id in assetIds)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(id);
+                T asset = AssetDatabase.LoadAssetAtPath<T>(path);
+                assets.Add(asset);
+            }
+
+            return assets;
         }
 
         private void OnEnable()
@@ -97,37 +133,44 @@ namespace AILab.BehaviourTree.EditorTools
 
         private void OnSelectionChange()
         {
-            var tree = Selection.activeObject as BehaviourTree;
-
-            if (!tree)
+            EditorApplication.delayCall += () =>
             {
-                if (Selection.activeGameObject)
+                var tree = Selection.activeObject as BehaviourTree;
+                if (!tree)
                 {
-                    var runner = Selection.activeGameObject.GetComponent<BehaviourTreeRunner>();
-                    if (runner)
+                    if (Selection.activeGameObject)
                     {
-                        tree = runner.Tree;
+                        var runner = Selection.activeGameObject.GetComponent<BehaviourTreeRunner>();
+                        if (runner)
+                        {
+                            tree = runner.Tree;
+                        }
                     }
                 }
-            }
+
+                SelectTree(tree);
+            };
+        }
+
+        private void SelectTree(BehaviourTree newTree)
+        {
+            if (treeView == null) return;
+
+            if (!newTree) return;
 
             if (Application.isPlaying)
             {
-                if (tree)
-                {
-                    treeView?.PopulateView(tree);
-                }
+                treeView.PopulateView(newTree);
             }
-            else if (tree && AssetDatabase.CanOpenAssetInEditor(tree.GetInstanceID()))
+            else
             {
-                treeView?.PopulateView(tree);
+                treeView.PopulateView(newTree);
             }
 
-            if (tree)
-            {
-                treeObject = new SerializedObject(tree);
-                blackboardProperty = treeObject.FindProperty("blackboard");
-            }
+            treeObject = new SerializedObject(newTree);
+            blackboardProperty = treeObject.FindProperty("blackboard");
+
+            EditorApplication.delayCall += () => treeView.FrameAll();
         }
 
         private void OnNodeSelectionChanged(NodeView nodeView)
