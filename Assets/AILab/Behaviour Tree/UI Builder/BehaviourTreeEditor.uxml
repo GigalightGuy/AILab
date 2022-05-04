@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/AILab/Behaviour%20Tree/UI%20Builder/BehaviourTreeEditor.uss?fileID=7433441132597879392&amp;guid=8f4fba632d57da647920e9cbcf484a0d&amp;type=3#BehaviourTreeEditor" />
+    <AILab.BehaviourTree.EditorTools.SplitView fixed-pane-initial-dimension="300">
+        <ui:VisualElement name="left-panel" style="flex-grow: 1;">
+            <AILab.BehaviourTree.EditorTools.SplitView orientation="Vertical" fixed-pane-initial-dimension="250">
+                <ui:VisualElement name="inspector-container">
+                    <ui:Label text="Inspector" display-tooltip-when-elided="true" style="-unity-font-style: bold; background-color: rgb(37, 37, 37); flex-shrink: 0; flex-grow: 0;" />
+                    <AILab.BehaviourTree.EditorTools.InspectorView style="flex-grow: 1;" />
+                </ui:VisualElement>
+                <ui:VisualElement name="blackboard-container">
+                    <ui:Label text="Blackboard" display-tooltip-when-elided="true" style="background-color: rgb(37, 37, 37); -unity-font-style: bold;" />
+                    <ui:IMGUIContainer />
+                </ui:VisualElement>
+            </AILab.BehaviourTree.EditorTools.SplitView>
+        </ui:VisualElement>
+        <ui:VisualElement name="right-panel" style="flex-grow: 1;">
+            <ui:Label text="Tree View" display-tooltip-when-elided="true" style="-unity-font-style: bold; background-color: rgb(37, 37, 37);" />
+            <AILab.BehaviourTree.EditorTools.BehaviourTreeView focusable="true" style="flex-grow: 1;" />
+        </ui:VisualElement>
+    </AILab.BehaviourTree.EditorTools.SplitView>
+</ui:UXML>

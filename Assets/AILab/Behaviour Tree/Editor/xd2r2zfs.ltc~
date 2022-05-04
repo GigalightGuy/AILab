@@ -1,0 +1,20 @@
+﻿using UnityEditor;
+using UnityEngine.UIElements;
+
+namespace AILab.BehaviourTree.EditorTools
+{
+    public class InspectorView : VisualElement
+    {
+        public new class UxmlFactory : UxmlFactory<InspectorView, UxmlTraits> { }
+
+        private Editor editor;
+
+        internal void UpdateSelection(NodeView nodeView)
+        {
+            Clear();
+
+            editor = Editor.CreateEditor(nodeView.node);
+            var container = new IMGUIContainer(() => editor.OnInspectorGUI());
+        }
+    }
+}
