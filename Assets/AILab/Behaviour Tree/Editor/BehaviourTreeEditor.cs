@@ -73,10 +73,22 @@ namespace AILab.BehaviourTree.EditorTools
 
             // Toolbar assets menu
             toolbarMenu = root.Q<ToolbarMenu>();
+            UpdateToolbarMenu();
+        }
+
+        private void UpdateToolbarMenu()
+        {
+            if (toolbarMenu == null) return;
+
+            toolbarMenu.menu.MenuItems().Clear();
+
             var behaviourTrees = LoadAssets<BehaviourTree>();
             behaviourTrees.ForEach(t =>
             {
-                toolbarMenu.menu.AppendAction($"{t.name}", a => SelectTree(t));
+                toolbarMenu.menu.AppendAction($"{t.name}", a =>
+                {
+                    Selection.activeObject = t;
+                });
             });
 
             if (treeView.tree == null)
@@ -162,7 +174,7 @@ namespace AILab.BehaviourTree.EditorTools
             {
                 treeView.PopulateView(newTree);
             }
-            else
+            else if(AssetDatabase.CanOpenAssetInEditor(newTree.GetInstanceID()))
             {
                 treeView.PopulateView(newTree);
             }
@@ -180,7 +192,18 @@ namespace AILab.BehaviourTree.EditorTools
 
         private void OnInspectorUpdate()
         {
+            if (!treeView.tree) treeView.ClearView();
             treeView?.UpdateNodeStates();
+        }
+
+        private void OnProjectChange()
+        {
+            UpdateToolbarMenu();
+        }
+
+        private void OnFocus()
+        {
+            UpdateToolbarMenu();
         }
     }
 }

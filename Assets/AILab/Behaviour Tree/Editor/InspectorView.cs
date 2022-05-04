@@ -17,7 +17,7 @@ namespace AILab.BehaviourTree.EditorTools
             editor = Editor.CreateEditor(nodeView.node);
             var container = new IMGUIContainer(() =>
             {
-                if (editor.target)
+                if (editor?.target)
                 {
                     editor.OnInspectorGUI();
                 }

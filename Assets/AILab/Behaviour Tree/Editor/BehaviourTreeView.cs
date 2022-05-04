@@ -44,6 +44,8 @@ namespace AILab.BehaviourTree.EditorTools
 
         internal void PopulateView(BehaviourTree tree)
         {
+            if (!tree) return;
+
             this.tree = tree;
 
             graphViewChanged -= OnGraphViewChanged;
@@ -79,7 +81,7 @@ namespace AILab.BehaviourTree.EditorTools
                 graphViewChange.elementsToRemove.ForEach(elem =>
                 {
                     var nodeView = elem as NodeView;
-                    if(nodeView != null)
+                    if(nodeView != null && nodeView.node)
                     {
                         tree.DeleteNode(nodeView.node);
                     }
@@ -177,6 +179,11 @@ namespace AILab.BehaviourTree.EditorTools
                     nodeView.UpdateState();
                 }
             });
+        }
+
+        internal void ClearView()
+        {
+            DeleteElements(graphElements);
         }
     }
 }

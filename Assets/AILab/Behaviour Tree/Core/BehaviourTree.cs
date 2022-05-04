@@ -8,7 +8,7 @@ using UnityEditor;
 
 namespace AILab.BehaviourTree
 {
-    [CreateAssetMenu(menuName = "AILab/Behaviour Tree", fileName = "New Behaviour Tree")]
+    [CreateAssetMenu(menuName = "AILab/Behaviour Tree", fileName = "NewBehaviourTree")]
     public class BehaviourTree : ScriptableObject
     {
         public Node root;
@@ -23,6 +23,57 @@ namespace AILab.BehaviourTree
                 treeState = root.Tick();
             }
             return treeState;
+        }
+
+        public List<Node> GetChildren(Node node)
+        {
+            var children = new List<Node>();
+
+            var root = node as RootNode;
+            if (root && root.child)
+            {
+                children.Add(root.child);
+            }
+            var decorator = node as DecoratorNode;
+            if (decorator && decorator.child)
+            {
+                children.Add(decorator.child);
+            }
+            var composite = node as CompositeNode;
+            if (composite && composite.children != null)
+            {
+                return composite.children;
+            }
+
+            return children;
+        }
+
+        public void Traverse(Node node, Action<Node> visiter)
+        {
+            if (node)
+            {
+                visiter.Invoke(node);
+                var children = GetChildren(node);
+                children.ForEach(c => Traverse(c, visiter));
+            }
+        }
+
+        public BehaviourTree Clone()
+        {
+            var tree = Instantiate(this);
+            tree.root = tree.root.Clone();
+            tree.nodes = new List<Node>();
+            Traverse(tree.root, n => tree.nodes.Add(n));
+            return tree;
+        }
+
+        public void Bind(Context context)
+        {
+            Traverse(root, n =>
+            {
+                n.context = context;
+                n.blackboard = blackboard;
+            });
         }
 
         #region Editor Tools
@@ -111,56 +162,5 @@ namespace AILab.BehaviourTree
         }
 #endif
         #endregion
-
-        public List<Node> GetChildren(Node node)
-        {
-            var children = new List<Node>();
-
-            var root = node as RootNode;
-            if (root && root.child)
-            {
-                children.Add(root.child);
-            }
-            var decorator = node as DecoratorNode;
-            if (decorator && decorator.child)
-            {
-                children.Add(decorator.child);
-            }
-            var composite = node as CompositeNode;
-            if (composite && composite.children != null)
-            {
-                return composite.children;
-            }
-
-            return children;
-        }
-
-        public void Traverse(Node node, Action<Node> visiter)
-        {
-            if (node)
-            {
-                visiter.Invoke(node);
-                var children = GetChildren(node);
-                children.ForEach(c => Traverse(c, visiter));
-            }
-        }
-
-        public BehaviourTree Clone()
-        {
-            var tree = Instantiate(this);
-            tree.root = tree.root.Clone();
-            tree.nodes = new List<Node>();
-            Traverse(tree.root, n => tree.nodes.Add(n));
-            return tree;
-        }
-
-        public void Bind(Context context)
-        {
-            Traverse(root, n =>
-            {
-                n.context = context;
-                n.blackboard = blackboard;
-            });
-        }
     }
 }
