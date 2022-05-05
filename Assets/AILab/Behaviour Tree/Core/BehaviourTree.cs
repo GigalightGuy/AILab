@@ -87,6 +87,7 @@ namespace AILab.BehaviourTree
             Undo.RecordObject(this, "Behaviour Tree (Create Node)");
             nodes.Add(node);
 
+            // Can't parent node to the tree asset in play mode
             if (!Application.isPlaying)
             {
                 AssetDatabase.AddObjectToAsset(node, this);

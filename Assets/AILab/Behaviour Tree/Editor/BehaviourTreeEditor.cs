@@ -83,6 +83,7 @@ namespace AILab.BehaviourTree.EditorTools
             toolbarMenu.menu.MenuItems().Clear();
 
             var behaviourTrees = LoadAssets<BehaviourTree>();
+
             behaviourTrees.ForEach(t =>
             {
                 toolbarMenu.menu.AppendAction($"{t.name}", a =>
@@ -194,11 +195,6 @@ namespace AILab.BehaviourTree.EditorTools
         {
             if (!treeView.tree) treeView.ClearView();
             treeView?.UpdateNodeStates();
-        }
-
-        private void OnProjectChange()
-        {
-            UpdateToolbarMenu();
         }
 
         private void OnFocus()

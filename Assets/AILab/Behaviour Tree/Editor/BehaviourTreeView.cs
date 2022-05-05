@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using UnityEngine;
 using UnityEditor;
 using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
@@ -12,8 +13,23 @@ namespace AILab.BehaviourTree.EditorTools
         public new class UxmlFactory : UxmlFactory<BehaviourTreeView, UxmlTraits> { }
 
         public BehaviourTree tree;
+        public BehaviourTreeSettings settings;
 
         public Action<NodeView> OnNodeSelected;
+
+        public struct ScriptTemplate
+        {
+            public TextAsset templateFile;
+            public string defaultFileName;
+            public string subFolder;
+        }
+
+        private ScriptTemplate[] templates =
+        {
+            new ScriptTemplate{templateFile = BehaviourTreeSettings.GetOrCreateSettings().scriptTemplateActionNode},
+            new ScriptTemplate{templateFile = BehaviourTreeSettings.GetOrCreateSettings().scriptTemplateCompositeNode},
+            new ScriptTemplate{templateFile = BehaviourTreeSettings.GetOrCreateSettings().scriptTemplateDecoratorNode},
+        };
 
         public BehaviourTreeView()
         {
@@ -108,18 +124,14 @@ namespace AILab.BehaviourTree.EditorTools
                 });
             }
 
-            if(graphViewChange.movedElements != null)
+            nodes.ForEach(n =>
             {
-
-                nodes.ForEach(n =>
+                var nodeView = n as NodeView;
+                if (nodeView != null)
                 {
-                    var nodeView = n as NodeView;
-                    if (nodeView != null)
-                    {
-                        nodeView.SortChildren();
-                    }
-                });
-            }
+                    nodeView.SortChildren();
+                }
+            });
 
             return graphViewChange;
         }
@@ -133,6 +145,11 @@ namespace AILab.BehaviourTree.EditorTools
 
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
+            //evt.menu.AppendAction($"Create script/New Action Node", (a) => CreateNewScript(ActionNode));
+            //evt.menu.AppendAction($"Create script/New Composite Node", (a) => CreateNewScript(CompositeNode));
+            //evt.menu.AppendAction($"Create script/New Decorator Node", (a) => CreateNewScript(DecoratorNode));
+            evt.menu.AppendSeparator();
+
             {
                 var types = TypeCache.GetTypesDerivedFrom<ActionNode>();
                 foreach (var type in types)
